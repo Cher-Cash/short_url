@@ -13,11 +13,11 @@ class ShortUrl:
         hash_object = hashlib.md5()
         hash_object.update(self.long_url.encode('utf-8'))
         hash_hex = hash_object.hexdigest()
-        ascii_hash = ''
+        ascii_hash = []
         for i in range(0, len(hash_hex),4):
             num = hash_hex[i:i+4]
-            ascii_hash += str(ShortUrl.process_byte(num))
-        self.hash = ascii_hash
+            ascii_hash.append(ShortUrl.process_byte(num))
+        self.hash = ''.join(ascii_hash)
         return self.hash
 
 
