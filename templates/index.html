@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorting url</title>
+</head>
+<body>
+    <h1>Input your url</h1>
+    <form action="/" method="get">
+        <label for="url">url:</label>
+        <input type="text" id="url" name="url" required><br><br>
+        <input type="submit" value="Submit">
+    </form>
+{% if generated_link %}
+    <h1><a href="http://127.0.0.1:5000/{{generated_link}}">http://127.0.0.1:5000/{{generated_link}}</a></h1>
+{% endif %}
+</body>
+</html>
