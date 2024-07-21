@@ -24,3 +24,7 @@ def short_url_route(short_url_link):
     if long_url:
         return redirect(long_url)
     return abort(404)
+
+
+if __name__ == "__main__":
+    app.run()
