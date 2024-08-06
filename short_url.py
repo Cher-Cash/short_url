@@ -1,9 +1,10 @@
 import hashlib
 
 
-def generate_hash(long_url: str):
+def generate_hash(long_url: str, current_time):
     hash_object = hashlib.md5()
     hash_object.update(long_url.encode('utf-8'))
+    hash_object.update(str(current_time.timestamp()).encode('utf-8'))
     hash_hex = hash_object.hexdigest()
     ascii_hash = [0] * 8
     for index_, i in enumerate(range(0, len(hash_hex), 4)):
