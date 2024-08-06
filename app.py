@@ -1,5 +1,5 @@
 import short_url
-from flask import Flask, render_template, request, abort, redirect
+from flask import Flask, render_template, request, abort, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -17,11 +17,6 @@ class URL(db.Model):
     short_hash = db.Column(db.String, primary_key=True)
     long_url = db.Column(db.String, nullable=False)
     created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, nullable=False)
-
-
-class URLCounter(db.Model):
-    __tablename__ = 'url_counters'
-    short_hash = db.Column(db.String, db.ForeignKey('urls.short_hash'), primary_key=True)
     counter = db.Column(db.Integer, default=0)
 
 
@@ -29,38 +24,38 @@ class URLCounter(db.Model):
 def index():
     url = request.args.get('url')
     if url:
-        generated_link = short_url.generate_hash(url)
-        new_url = URL(short_hash=generated_link, long_url=url)
+        current_time = datetime.utcnow()
+        generated_link = short_url.generate_hash(url, current_time)
+        for i in range(8, 16):
+            existing_url = URL.query.filter_by(short_hash=generated_link[:i]).first()
+            if not existing_url:
+                generated_link = generated_link[:i]
+                break
+        else:
+            return redirect(url_for('index', url=url))
+        new_url = URL(short_hash=generated_link, long_url=url, created_at=current_time)
         db.session.add(new_url)
         db.session.commit()
-        new_counter = URLCounter(short_hash=generated_link, counter=0)
-        db.session.add(new_counter)
-        db.session.commit()
-
         return render_template('index.html', generated_link=generated_link)
     return render_template('index.html')
 
 
 @app.route('/<short_url_link>')
 def short_url_route(short_url_link):
-    url_record = URL.query.filter_by(short_hash=short_url_link).first()
-    if url_record:
-        counter_record = URLCounter.query.filter_by(short_hash=short_url_link).first()
-        counter_record.counter += 1
-        db.session.commit()
-        print(f"Counter for {short_url_link}: {counter_record.counter}")
+    url_record = URL.query.filter_by(short_hash=short_url_link).first_or_404()
 
-        return redirect(url_record.long_url)
-    return abort(404)
+    url_record.counter += 1
+    db.session.add(url_record)
+    db.session.commit()
+    print(f"Counter for {short_url_link}: {url_record.counter}")
+    return redirect(url_record.long_url)
 
 
 @app.route('/creation_time/<short_hash>')
 def get_creation_time(short_hash):
-    url_record = URL.query.filter_by(short_hash=short_hash).first()
-    if url_record:
-        creation_time = url_record.created_at
-        return f"The URL was created at: {creation_time}"
-    return "URL not found", 404
+    url_record = URL.query.filter_by(short_hash=short_hash).first_or_404()
+    creation_time = url_record.created_at
+    return f"The URL was created at: {creation_time}"
 
 
 if __name__ == "__main__":
