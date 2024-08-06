@@ -1,5 +1,5 @@
 import short_url
-from flask import Flask, render_template, request, abort, redirect
+from flask import Flask, render_template, request, abort, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -26,6 +26,13 @@ def index():
     if url:
         current_time = datetime.utcnow()
         generated_link = short_url.generate_hash(url, current_time)
+        for i in range(8, 16):
+            existing_url = URL.query.filter_by(short_hash=generated_link[:i]).first()
+            if not existing_url:
+                generated_link = generated_link[:i]
+                break
+        else:
+            return redirect(url_for('index', url=url))
         new_url = URL(short_hash=generated_link, long_url=url, created_at=current_time)
         db.session.add(new_url)
         db.session.commit()
