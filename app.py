@@ -1,5 +1,5 @@
 import short_url
-from flask import Flask, render_template, request, abort, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -11,12 +11,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-
 class URL(db.Model):
     __tablename__ = 'urls'
     short_hash = db.Column(db.String, primary_key=True)
     long_url = db.Column(db.String, nullable=False)
-    created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.TIMESTAMP, default=datetime.now, nullable=False)
     counter = db.Column(db.Integer, default=0)
 
 
@@ -24,7 +23,7 @@ class URL(db.Model):
 def index():
     url = request.args.get('url')
     if url:
-        current_time = datetime.utcnow()
+        current_time = datetime.now()
         generated_link = short_url.generate_hash(url, current_time)
         for i in range(8, 16):
             existing_url = URL.query.filter_by(short_hash=generated_link[:i]).first()
