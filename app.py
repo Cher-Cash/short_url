@@ -21,6 +21,7 @@ class URL(db.Model):
 
 @app.route('/')
 def index():
+    host = request.headers.get('Host')
     url = request.args.get('url')
     if url:
         current_time = datetime.now()
@@ -35,7 +36,7 @@ def index():
         new_url = URL(short_hash=generated_link, long_url=url, created_at=current_time)
         db.session.add(new_url)
         db.session.commit()
-        return render_template('index.html', generated_link=generated_link)
+        return render_template('index.html', generated_link=generated_link, host=host)
     return render_template('index.html')
 
 
