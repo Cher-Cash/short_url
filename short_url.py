@@ -16,7 +16,8 @@ def generate_hash(long_url: str, current_time):
 
 def process_byte(num_line):
     num = int(num_line, 16)
-    # гарантия что ascii_num будет в пределах 48-105 (диапазон, который включает все цифры и многие буквы)
+    # гарантия что ascii_num будет в пределах 48-105
+    # (диапазон, который включает все цифры и многие буквы)
     ascii_num = (num % 58) + 48
     if (58 <= ascii_num <= 64) or (91 <= ascii_num <= 96):
         ascii_char = '_'
